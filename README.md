@@ -16,8 +16,14 @@
 - `app.py`: Backend de Flask que maneja las solicitudes de búsqueda.
 - `templates/index.html`: Interfaz de usuario para realizar consultas y ver los resultados.
 - `data.csv`: Archivo original de datos con columnas `index`, `title`, `genre`, y `summary`.
-- `data_duplicated.csv`: Archivo duplicado generado para pruebas con un mayor volumen de datos.
 - `final_inverted_index.json`: Archivo JSON que almacena el índice invertido final después de construirlo con SPIMI.
+
+## Funcionalidades Implementadas
+## Backend
+1. Preprocesamiento de Texto: Se utiliza nltk para la tokenización, eliminación de stopwords y stemming.
+2. Índice Invertido con TF-IDF: Implementación de un índice invertido que utiliza TF-IDF para calcular la relevancia de términos en los documentos.
+3. SPIMI (Single-Pass In-Memory Indexing): Para manejar grandes volúmenes de datos, se dividió el índice en bloques que se almacenan en memoria secundaria, los cuales luego se combinan en un índice final.
+4. Almacenamiento en JSON: El índice invertido se guarda en formato JSON para evitar recalculaciones innecesarias y mejorar la eficiencia en la carga.
 
 ## Instalación y Ejecución
 ### Requisitos
