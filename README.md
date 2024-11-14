@@ -50,3 +50,32 @@ DataFusionDB es un proyecto enfocado en la integración de diferentes modelos de
 ```
 - Ingresa a la dirección creada para acceder a la interfaz de busqueda.
 
+
+## Análisis de Resultados
+
+### Tabla de Resultados
+
+| Cantidad de Documentos | Tiempo en Python (ms) | Tiempo en PostgreSQL (ms) |
+|------------------------|-----------------------|---------------------------|
+| 4657                   | 2.1                   | 0.284                     |
+| 9314                   | 7.8                   | 0.372                     |
+| 18628                  | 5.8                   | 0.828                     |
+| 37256                  | 4.0                   | 1.558                     |
+| 74512                  | 1.6                   | 3.329                     |
+| 149024                 | 6.0                   | 4.850                     |
+
+### Interpretación de los Gráficos
+
+El gráfico compara los tiempos de ejecución entre Python y PostgreSQL a medida que aumenta la cantidad de documentos.
+
+- **Tendencia en Python**: Se observa que el tiempo de ejecución en Python no sigue un patrón lineal. Los tiempos fluctúan, lo cual podría deberse a factores como la gestión de memoria o el método de acceso al índice.
+- **Tendencia en PostgreSQL**: Los tiempos de PostgreSQL muestran una tendencia de crecimiento casi lineal conforme aumenta la cantidad de documentos, lo cual indica un rendimiento más consistente y optimizado para manejar grandes volúmenes de datos.
+
+### Análisis Comparativo
+
+1. **Rendimiento en Cantidades Pequeñas**: Para volúmenes menores (por ejemplo, hasta 4657 documentos), Python y PostgreSQL tienen tiempos de ejecución similares. Sin embargo, PostgreSQL es más rápido en general, incluso en pequeñas cantidades.
+  
+2. **Rendimiento en Cantidades Grandes**: A medida que aumenta el número de documentos, PostgreSQL mantiene un rendimiento más eficiente y predecible, mientras que Python muestra más variabilidad.
+
+3. **Conclusión**: PostgreSQL es mejor para manejar grandes volúmenes de datos de manera consistente, mientras que Python podría ser adecuado para prototipos o pequeños conjuntos de datos.
+
