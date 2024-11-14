@@ -64,6 +64,11 @@ DataFusionDB es un proyecto enfocado en la integración de diferentes modelos de
 | 74512                  | 1.6                   | 3.329                     |
 | 149024                 | 6.0                   | 4.850                     |
 
+## Gráfico de Comparación de Tiempos de Ejecución
+
+![Comparación de Tiempos de Ejecución entre Python y PostgreSQL](images/ejemplo.jpg)
+
+
 ### Interpretación de los Gráficos
 
 El gráfico compara los tiempos de ejecución entre Python y PostgreSQL a medida que aumenta la cantidad de documentos.
