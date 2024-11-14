@@ -20,10 +20,10 @@
 
 ## Funcionalidades Implementadas
 ## Backend
-1. Preprocesamiento de Texto: Se utiliza nltk para la tokenización, eliminación de stopwords y stemming.
-2. Índice Invertido con TF-IDF: Implementación de un índice invertido que utiliza TF-IDF para calcular la relevancia de términos en los documentos.
-3. SPIMI (Single-Pass In-Memory Indexing): Para manejar grandes volúmenes de datos, se dividió el índice en bloques que se almacenan en memoria secundaria, los cuales luego se combinan en un índice final.
-4. Almacenamiento en JSON: El índice invertido se guarda en formato JSON para evitar recalculaciones innecesarias y mejorar la eficiencia en la carga.
+- `Preprocesamiento de Texto`: Se utiliza nltk para la tokenización, eliminación de stopwords y stemming.
+- `Índice Invertido con TF-IDF`: Implementación de un índice invertido que utiliza TF-IDF para calcular la relevancia de términos en los documentos.
+- `SPIMI (Single-Pass In-Memory Indexing)`: Para manejar grandes volúmenes de datos, se dividió el índice en bloques que se almacenan en memoria secundaria, los cuales luego se combinan en un índice final.
+- `Almacenamiento en JSON`: El índice invertido se guarda en formato JSON para evitar recalculaciones innecesarias y mejorar la eficiencia en la carga.
 
 ## Instalación y Ejecución
 ### Requisitos
