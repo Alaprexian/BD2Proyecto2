@@ -72,8 +72,8 @@ DataFusionDB es un proyecto enfocado en la integración de diferentes modelos de
 ### Interpretación de los Gráficos
 
 El gráfico compara los tiempos de ejecución entre Python y PostgreSQL a medida que aumenta la cantidad de documentos.
-
-- **Tendencia en Python**: Se observa que el tiempo de ejecución en Python no sigue un patrón lineal. Los tiempos fluctúan, lo cual podría deberse a factores como la gestión de memoria o el método de acceso al índice.
+Cabe anotar que en el gráfico, los tiempos de ejecución más largos en Python y PostgreSQL pueden no ser completamente representativos de un escenario con datos únicos y variados, dado que los duplicados pueden estar influyendo en el rendimiento, por lo que no es una evaluación precisa pero ayudan a dar una base para pruebas iniciales de rendimiento.
+- **Tendencia en Python**: Se puede observar que el tiempo de ejecución en Python no sigue un patrón lineal. Los tiempos fluctúan, lo cual podría deberse al aumento en el tamaño del conjunto sin necesariamente aumentar la variedad de contenido. Esto llevaria a una menor precisión en el análisis de rendimiento puesto que los tiempos de ejecución estarian reflejando la carga de datos redundantes en lugar de datos únicos.
 - **Tendencia en PostgreSQL**: Los tiempos de PostgreSQL muestran una tendencia de crecimiento casi lineal conforme aumenta la cantidad de documentos, lo cual indica un rendimiento más consistente y optimizado para manejar grandes volúmenes de datos.
 
 ### Análisis Comparativo
