@@ -16,6 +16,17 @@ DataFusionDB es un proyecto enfocado en la integración de diferentes modelos de
 - **SPIMI (Single-Pass In-Memory Indexing)**: Para manejar grandes volúmenes de datos, se dividió el índice en bloques que se almacenan en memoria secundaria, los cuales luego se combinan en un índice final.
 - **Almacenamiento en JSON**: El índice invertido se guarda en formato JSON para evitar recalculaciones innecesarias y mejorar la eficiencia en la carga.
 
+**Investigación**
+**¿Como realiza PostgreSQL recuperazión de textos?**
+1. **Indices de texto**:
+PostgreSQL utiliza principalmente 2 tipos de indices para una busqueda de texto:
+- **GIN (Generalized Inverted Index)**: Usado para una busqueda exacta de palabras. Al descomponer el texto en tokens, los guarda junto a una lista de documentos en los que aparece, de modo que, al momento de realizarse la busqueda, ya no se tendria que escanear la tabla, ya que se puede ir directamente a la palabra buscada.
+- **GiST (Generalized Search Tree)**: Usado para busquedas por similitud (proximidad). Tiene mas libertad que el GIN pero tambien esta mas propenso a errores.
+
+2. **Función de Similitud**:
+Como se menciono previamente en GIN, PostgreSQL utiliza un tsvector para almacenar el texto tokenizado.
+Se tokeniza tambien la query para obtener tsquery, con la cual se realizara la busqueda de coincidencias en el tsvector.
+
 ### Frontend
 - **Aplicación Web con Flask**: Se utilizó Flask para crear un servidor web que permite realizar consultas en el índice invertido.
 - **Interfaz de Usuario**: Se creó una interfaz en HTML y CSS donde el usuario puede:
@@ -51,7 +62,7 @@ DataFusionDB es un proyecto enfocado en la integración de diferentes modelos de
 - Ingresa a la dirección creada para acceder a la interfaz de busqueda.
 
 
-## Análisis de Resultados
+## Experimentación y Análisis de Resultados
 
 ### Tabla de Resultados
 
