@@ -1,4 +1,4 @@
-# Proyecto: DataFusionDB
+# Proyecto: SPIMI Data Query
 
 ## Descripción General
 DataFusionDB es un proyecto enfocado en la integración de diferentes modelos de datos y técnicas avanzadas de recuperación de información en una base de datos. El proyecto incluye la implementación de un índice invertido para búsqueda de texto completo y una interfaz web para interactuar con el índice.
