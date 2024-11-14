@@ -6,8 +6,7 @@ DataFusionDB es un proyecto enfocado en la integración de diferentes modelos de
 ## Objetivos
 - Desarrollar un índice invertido para realizar búsquedas eficientes en colecciones de texto.
 - Implementar la funcionalidad de SPIMI para manejar grandes colecciones de datos en memoria secundaria.
-- Crear un frontend interactivo donde los usuarios puedan ingresar consultas textuales, especificar el número de resultados (Top K) y elegir el método de indexación.
-
+- Crear un frontend interactivo donde los usuarios puedan ingresar consultas textuales, especificar el número de resultados (Top K).
 ## Funcionalidades Implementadas
 
 ### Backend
