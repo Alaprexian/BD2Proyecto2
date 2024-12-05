@@ -45,12 +45,111 @@ Se tokeniza tambien la query para obtener tsquery, con la cual se realizara la b
 
 ## Ejecución
 
-1. **Requisitos**: 
-   ```bash
-   pip install pandas nltk flask
+1. **Preprocesamiento de Texto**: 
+   El preprocesamiento convierte el texto en tokens útiles para el análisis. Incluye
+   - Tokenización
+   - Conversión a minúsculas
+   - Eliminación de palabras vacías y signos de puntuación
+   - Reducción de palabras a su raíz
+  
+  ```python
+def preprocess_text(text):
+    tokens = word_tokenize(text.lower())
+    processed_tokens = [
+        ps.stem(word) for word in tokens 
+        if word not in stop_words and word not in string.punctuation
+    ]
+    return processed_tokens
+
+```
+2. **Construcción de Índices**:
+   La función build_block_inverted_index procesa un bloque de documentos, calcula las frecuencias de los términos (TF) y pondera cada término con TF-IDF.
+
+   ```python
+    def build_block_inverted_index(data_block):
+        block_inverted_index = defaultdict(dict)
+        document_frequencies = defaultdict(int)
+
+    for _, row in data_block.iterrows():
+        doc_id = row['index']
+        text = f"{row['title']} {row['genre']} {row['summary']}"
+        terms = preprocess_text(text)
+
+        term_frequencies = defaultdict(int)
+        for term in terms:                    
+            term_frequencies[term] += 1
+
+        for term, tf in term_frequencies.items():
+            block_inverted_index[term][doc_id] = tf
+            document_frequencies[term] += 1
+
+    N = len(data_block)
+    for term, doc_list in block_inverted_index.items():
+        idf = math.log(N / document_frequencies[term])
+        for doc_id, tf in doc_list.items():
+            block_inverted_index[term][doc_id] = tf * idf
+
+    return block_inverted_index
+
+    ```
+
+4. **Guardado de Bloques**:
+   Cada bloque del índice se guarda en un archivo JSON para optimizar el manejo de memoria.
+   ```python
+    def save_block_to_disk(block_index, block_num):
+    with open(f'block_{block_num}.json', 'w') as f:
+        json.dump(block_index, f)
+    print(f"Bloque {block_num} guardado en disco.")
 
 
-2. ## Preparar el Índice:
+    ```
+
+6. **Normaliczación de Vectores**:
+   Los vectores de términos de cada documento se normalizan para facilitar el cálculo de similitudes.
+   ```python
+    def normalize_vector(vector):
+    norm = math.sqrt(sum(val ** 2 for val in vector.values()))
+    return {key: val / norm for key, val in vector.items()} if norm != 0 else vector
+    ```
+   
+4. **Índice Maestro**:
+   El índice maestro permite identificar rápidamente en qué bloques se encuentra un término.
+   ```python
+    def build_blocks():
+    master_index = defaultdict(set)
+    for block_num in range(num_blocks):
+        start = block_num * BLOCK_SIZE
+        end = min(start + BLOCK_SIZE, len(data))
+        data_block = data.iloc[start:end]
+
+        block_index = build_block_inverted_index(data_block)
+        save_block_to_disk(block_index, block_num)
+        save_block_with_norms(block_index, block_num)
+
+        for term in block_index.keys():
+            master_index[term].add(block_num)
+
+    with open('master_index.json', 'w') as f:
+        json.dump({term: list(blocks) for term, blocks in master_index.items()}, f)
+    print("Índice maestro guardado en disco.")
+
+    ```
+
+
+4. **Similitud de Coseno**:
+  La similitud de coseno mide qué tan relevantes son los documentos con respecto a la consulta.
+   ```python
+    def cosine_similarity(query_vector, doc_vector):
+    dot_product = sum(query_vector.get(term, 0) * doc_vector.get(term, 0) for term in query_vector)
+    query_norm = math.sqrt(sum(val ** 2 for val in query_vector.values()))
+    doc_norm = math.sqrt(sum(val ** 2 for val in doc_vector.values()))
+    if query_norm == 0 or doc_norm == 0:
+        return 0
+    return dot_product / (query_norm * doc_norm)
+
+
+    ``` 
+5. ## Prepar:
 - Ejecuta `Parte1.py` para construir y guardar el índice invertido en `final_inverted_index.json`.
 
 3. ## Iniciar la Aplicación:
