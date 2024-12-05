@@ -38,7 +38,7 @@ def build_block_inverted_index(data_block):
 
         # Calcular TF para cada término en el documento actual
         term_frequencies = defaultdict(int)
-        for term in terms:
+        for term in terms:                    
             term_frequencies[term] += 1
 
         # Añadir términos al índice invertido del bloque con su TF
@@ -61,38 +61,76 @@ def save_block_to_disk(block_index, block_num):
         json.dump(block_index, f)
     print(f"Bloque {block_num} guardado en disco.")
 
-# Función para cargar bloques y combinarlos en un índice invertido final
-def merge_blocks(num_blocks):
-    final_inverted_index = defaultdict(dict)
+
+# Función para normalizar vectores
+def normalize_vector(vector):
+    norm = math.sqrt(sum(val ** 2 for val in vector.values()))
+    return {key: val / norm for key, val in vector.items()} if norm != 0 else vector
+
+# Guardar bloque con vectores normalizados
+def save_block_with_norms(block_index, block_num):
+    normalized_index = {}
+    for term, postings in block_index.items():
+        for doc_id, tfidf in postings.items():
+            if doc_id not in normalized_index:
+                normalized_index[doc_id] = {}
+            normalized_index[doc_id][term] = tfidf
+
+    # Normalizar los vectores por documento
+    normalized_vectors = {doc_id: normalize_vector(vector) for doc_id, vector in normalized_index.items()}
+    
+    # Guardar en disco
+    with open(f'block_{block_num}_normalized.json', 'w') as f:
+        json.dump(normalized_vectors, f)
+    print(f"Bloque {block_num} normalizado guardado en disco.")
+
+BLOCK_SIZE = 1000  # Número de documentos por bloque
+data = pd.read_csv('C:/Users/crist/go/BD2Proyecto2/data.csv')
+num_blocks = (len(data) + BLOCK_SIZE - 1) // BLOCK_SIZE
+
+def build_blocks():
+    # Crear el índice maestro mientras se procesan los bloques
+    master_index = defaultdict(set)
 
     for block_num in range(num_blocks):
-        with open(f'block_{block_num}.json', 'r') as f:
-            block_index = json.load(f)
+        start = block_num * BLOCK_SIZE
+        end = min(start + BLOCK_SIZE, len(data))
+        data_block = data.iloc[start:end]
 
-            # Combinar términos de cada bloque en el índice final
-            for term, postings in block_index.items():
-                if term not in final_inverted_index:
-                    final_inverted_index[term] = postings
-                else:
-                    final_inverted_index[term].update(postings)
+        # Construir índice invertido del bloque
+        block_index = build_block_inverted_index(data_block)
+        save_block_to_disk(block_index, block_num)
+        save_block_with_norms(block_index, block_num)
 
-    # Guardar el índice combinado en un archivo JSON
-    with open('final_inverted_index.json', 'w') as f:
-        json.dump(final_inverted_index, f)
-    print("Índice invertido final guardado en disco.")
+        # Actualizar índice maestro
+        for term in block_index.keys():
+            master_index[term].add(block_num)
+
+    # Guardar el índice maestro
+    with open('master_index.json', 'w') as f:
+        json.dump({term: list(blocks) for term, blocks in master_index.items()}, f)
+    print("Índice maestro guardado en disco.")
+
+def cosine_similarity(query_vector, doc_vector):
+    dot_product = sum(query_vector.get(term, 0) * doc_vector.get(term, 0) for term in query_vector)
+    query_norm = math.sqrt(sum(val ** 2 for val in query_vector.values()))
+    doc_norm = math.sqrt(sum(val ** 2 for val in doc_vector.values()))
+    if query_norm == 0 or doc_norm == 0:
+        return 0
+    return dot_product / (query_norm * doc_norm)
+
+
 
 # Parámetros de SPIMI
 BLOCK_SIZE = 1000  # Número de documentos por bloque
 
 """
 # Leer CSV
-data = pd.read_csv('data.csv')
-for i in range(5):
-    data = pd.concat([data, data], ignore_index=True)
+data = pd.read_csv('C:/Users/crist/go/BD2Proyecto2/data.csv')
+
 num_blocks = (len(data) + BLOCK_SIZE - 1) // BLOCK_SIZE  # Calcular número de bloques necesarios
 
 # Construcción de índice por bloques
-#
 for block_num in range(num_blocks):
     start = block_num * BLOCK_SIZE
     end = min(start + BLOCK_SIZE, len(data))
@@ -103,5 +141,8 @@ for block_num in range(num_blocks):
     save_block_to_disk(block_index, block_num)
 
 # Combinar todos los bloques en un solo índice invertido final
-merge_blocks(num_blocks)
+
+
+build_blocks()
+
 """
