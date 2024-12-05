@@ -28,8 +28,7 @@ FROM books;
 
 EXPLAIN ANALYZE
 SELECT title, ts_rank_cd(compuesto, query_w) AS rank
-FROM books, plainto_tsquery('english', 'fantasy nobility') query_w
+FROM books, to_tsquery('english', 'fantasy | nobility') query_w
 WHERE query_w @@ compuesto
 ORDER BY rank DESC
 LIMIT 50;
-
