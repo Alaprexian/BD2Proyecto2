@@ -149,9 +149,128 @@ def preprocess_text(text):
 
 
     ``` 
-5. ## Prepar:
-- Ejecuta `Parte1.py` para construir y guardar el índice invertido en `final_inverted_index.json`.
+5. ## App.py:
+1. **Compute_query_vector**:
+  Esta función recibe una consulta (query), un índice invertido (inverted_index) y N, que es el número total de documentos.
+Preprocesamiento: La consulta se preprocesa para convertirla en una lista de términos significativos (sin stopwords, por ejemplo).
+Cálculo de términos: Se cuenta cuántas veces aparece cada término en la consulta utilizando Counter.
+Cálculo del peso de cada término:
+Se obtiene el IDF (Inverse Document Frequency) para cada término utilizando la fórmula log(N / DF) donde DF es el número de documentos que contienen el término.
+Para cada término en la consulta, el peso se calcula como el producto de la frecuencia del término (count) y el IDF.
+Retorna el vector de consulta: El vector resultante es un diccionario con términos como claves y sus respectivos pesos como valores.
+   ```python
+    def compute_query_vector(query, inverted_index, N):
+    query_terms = preprocess_text(query)
+    query_vector = {}
+    term_counts = Counter(query_terms)
+    
+    for term, count in term_counts.items():
+        if term in inverted_index:
+            idf = math.log(N / len(inverted_index[term]))
+            query_vector[term] = count * idf
+    
+    return query_vector
 
+
+
+    ```
+
+
+2. **Cosine_similitary**:
+ Esta función calcula la similitud de coseno entre dos vectores, el vector de la consulta y el vector del documento.
+Producto punto: Calcula el producto punto entre el vector de la consulta y el del documento, sumando el producto de los pesos de los términos comunes en ambos vectores.
+Normas de los vectores: Se calcula la norma de cada vector (la raíz cuadrada de la suma de los cuadrados de sus elementos).
+Similitud de coseno: La fórmula de similitud de coseno es el producto punto dividido por el producto de las normas de ambos vectores. Si alguno de los vectores tiene norma cero (es decir, es un vector vacío), la similitud se devuelve como cero.
+
+   ```python
+   def cosine_similarity(query_vector, doc_vector):
+    dot_product = sum(query_vector[term] * doc_vector.get(term, 0) for term in query_vector)
+    query_norm = math.sqrt(sum(val ** 2 for val in query_vector.values()))
+    doc_norm = math.sqrt(sum(val ** 2 for val in doc_vector.values()))
+    if query_norm == 0 or doc_norm == 0:
+        return 0
+    return dot_product / (query_norm * doc_norm)
+
+
+    ```
+3. **Search_similitary**:
+ Esta es la función que realiza la búsqueda en el sistema:
+Preprocesamiento: Preprocesa la consulta para obtener los términos relevantes.
+Carga el índice maestro: El índice invertido se carga desde master_index.json, que mapea términos a bloques de documentos.
+Identificación de bloques relevantes: Se obtienen los bloques relevantes que contienen los términos de la consulta.
+Cálculo del vector de consulta: La consulta se convierte en un vector de término ponderado (TF).
+Búsqueda en bloques relevantes:
+Para cada bloque, se cargan los vectores de los documentos normalizados.
+Se calcula la similitud de coseno entre la consulta y cada documento en el bloque.
+Obtención de los resultados: Se obtienen los mejores resultados, ordenados por la similitud de coseno.
+Carga del dataset: Se carga un archivo CSV (data.csv) que contiene información adicional sobre los documentos (títulos, géneros, resúmenes).
+Devolución de resultados: Los resultados finales se devuelven con el doc_id, score, title, genre y summary.
+
+   ```python
+   def search_similarity(query, num_results=10):
+    query_terms = preprocess_text(query)
+    
+    # Cargar índice maestro
+    with open('master_index.json', 'r') as f:
+        master_index = json.load(f)
+
+    # Identificar bloques relevantes
+    relevant_blocks = set()
+    for term in query_terms:
+        if term in master_index:
+            relevant_blocks.update(master_index[term])
+
+    # Calcular el vector de la consulta
+    query_vector = defaultdict(float)
+    for term in query_terms:
+        query_vector[term] += 1  # TF para la consulta
+
+    query_vector = normalize_vector(query_vector)
+
+    # Buscar en los bloques relevantes
+    block_results = []
+    for block_num in relevant_blocks:
+        with open(f'block_{block_num}_normalized.json', 'r') as f:
+            normalized_vectors = json.load(f)
+
+        # Calcular similitud de coseno con cada documento en el bloque
+        scores = {}
+        for doc_id, doc_vector in normalized_vectors.items():
+            similarity = cosine_similarity(query_vector, doc_vector)
+            scores[doc_id] = similarity
+
+        # Agregar los mejores resultados del bloque
+        sorted_scores = sorted(scores.items(), key=lambda x: x[1], reverse=True)
+        block_results.extend(sorted_scores[:num_results])
+
+    # Ordenar resultados finales y devolver los mejores
+    block_results = sorted(block_results, key=lambda x: x[1], reverse=True)[:num_results]
+
+    # Cargar el dataset original para obtener los summaries
+    data = pd.read_csv('C:/Users/crist/go/BD2Proyecto2/data.csv')
+    results_with_summary = []
+    for doc_id, score in block_results:
+        doc_id = int(doc_id) 
+        if 0 <= doc_id < len(data):  # Verificamos que el índice sea válido
+            row = data.iloc[doc_id]  # Obtenemos la fila correspondiente por posición
+            summary = row['summary']
+            title = row['title']
+            genre = row['genre']
+        else:
+            summary = "Resumen no disponible"
+            title = "Título no disponible"
+            genre = "Género no disponible"
+        results_with_summary.append({
+            'doc_id': doc_id,
+            'score': score,
+            'title': title,
+            'genre': genre,
+            'summary': summary
+        })
+    
+    return results_with_summary
+
+    ``` 
 3. ## Iniciar la Aplicación:
 - Inicia el servidor Flask desde app.py con el comando:
 ```bash
