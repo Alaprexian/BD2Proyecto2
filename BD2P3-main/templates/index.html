@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Search App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 20px;
+        }
+        .result {
+            display: inline-block;
+            margin: 10px;
+            border: 1px solid #ccc;
+            padding: 10px;
+            width: 200px;
+            text-align: center;
+        }
+        .result img {
+            max-width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Image Search App</h1>
+    <form id="search-form">
+        <label for="image">Cargar Imagen:</label>
+        <input type="file" id="image" name="image" accept="image/*" required>
+        <br><br>
+        <label for="method">Seleccionar Método:</label>
+        <select id="method" name="method">
+            <option value="Sequential">Sequential</option>
+            <option value="KDTree">KDTree</option>
+        </select>
+        <br><br>
+        <button type="submit">Buscar</button>
+    </form>
+    <h2>Resultados:</h2>
+    <div id="results"></div>
+
+    <script>
+        document.getElementById('search-form').addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const formData = new FormData();
+            const imageFile = document.getElementById('image').files[0];
+            const method = document.getElementById('method').value;
+
+            formData.append('image', imageFile);
+            formData.append('method', method);
+
+            try {
+                const response = await fetch('/search', {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                if (!response.ok) {
+                    throw new Error('Error en la búsqueda: ' + response.statusText);
+                }
+
+                const results = await response.json();
+                const resultsDiv = document.getElementById('results');
+                resultsDiv.innerHTML = ''; // Limpiar resultados anteriores
+
+                if (results.length === 0) {
+                    resultsDiv.innerHTML = '<p>No se encontraron resultados.</p>';
+                } else {
+                    results.forEach(result => {
+                        const resultDiv = document.createElement('div');
+                        resultDiv.classList.add('result');
+
+                        const img = document.createElement('img');
+                        img.src = `/image/${result.path}`;
+                        img.alt = result.label;
+
+                        const label = document.createElement('p');
+                        label.textContent = `Etiqueta: ${result.label}`;
+
+                        const distance = document.createElement('p');
+                        distance.textContent = `Distancia: ${result.distance}`;
+
+                        resultDiv.appendChild(img);
+                        resultDiv.appendChild(label);
+                        resultDiv.appendChild(distance);
+                        resultsDiv.appendChild(resultDiv);
+                    });
+                }
+            } catch (error) {
+                console.error(error);
+                const resultsDiv = document.getElementById('results');
+                resultsDiv.innerHTML = '<p>Ocurrió un error al realizar la búsqueda.</p>';
+            }
+        });
+    </script>
+</body>
+</html>
