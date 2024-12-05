@@ -95,6 +95,9 @@ El backend está construido en Flask y ofrece las siguientes rutas:
 ![](images/img2.png)
 ---
 
+### **Experimentos**
+![](images/image.png)
+
 ## **Requisitos del Sistema**
 **Librerías**:
    - Python >= 3.8
